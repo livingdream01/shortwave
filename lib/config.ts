@@ -19,11 +19,15 @@ export const config = {
     modelFast: env("DEEPSEEK_MODEL_FAST") ?? "deepseek-chat",
   },
   supabase: {
-    url: env("SUPABASE_URL"),
-    anonKey: env("SUPABASE_ANON_KEY"),
+    url: env("SUPABASE_URL") ?? env("NEXT_PUBLIC_SUPABASE_URL"),
+    anonKey: env("SUPABASE_ANON_KEY") ?? env("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
     serviceRoleKey: env("SUPABASE_SERVICE_ROLE_KEY"),
     bucket: env("SUPABASE_BUCKET") ?? "shortwave",
+    publicUrl: env("NEXT_PUBLIC_SUPABASE_URL"),
+    publicAnonKey: env("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
   },
+  vault: { key: env("SW_TOKEN_KEK") },
+  operatorEmail: env("OPERATOR_EMAIL"),
   fal: { key: env("FAL_KEY") },
   replicate: { token: env("REPLICATE_API_TOKEN") },
   elevenlabs: {

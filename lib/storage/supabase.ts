@@ -2,6 +2,12 @@ import { createClient } from "@supabase/supabase-js";
 import { readFile } from "node:fs/promises";
 import { config } from "../config";
 
+export interface StorageConfig {
+  url?: string;
+  serviceRoleKey?: string;
+  bucket?: string;
+}
+
 /**
  * Upload a local file to the public Supabase storage bucket and return
  * its public URL. Instagram fetches the video by URL, so the object
@@ -11,8 +17,11 @@ export async function uploadPublic(
   localPath: string,
   destPath: string,
   contentType = "video/mp4",
+  override: StorageConfig = {},
 ): Promise<string> {
-  const { url, serviceRoleKey, bucket } = config.supabase;
+  const url = override.url ?? config.supabase.url;
+  const serviceRoleKey = override.serviceRoleKey ?? config.supabase.serviceRoleKey;
+  const bucket = override.bucket ?? config.supabase.bucket;
   if (!url || !serviceRoleKey) {
     throw new Error("Supabase storage is not configured (SUPABASE_URL / SERVICE_ROLE_KEY)");
   }

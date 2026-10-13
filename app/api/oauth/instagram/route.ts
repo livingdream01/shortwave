@@ -1,59 +1,68 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { config } from "../../../../lib/config";
+import { supabaseServer } from "../../../../lib/supabase/server";
+import { supabaseAdmin } from "../../../../lib/supabase/admin";
 import { exchangeCode, toLongLived } from "../../../../lib/publish/tokens";
+import { seal } from "../../../../lib/vault";
 
-const SCOPES = [
-  "instagram_business_basic",
-  "instagram_business_content_publish",
-  "instagram_manage_insights",
-].join(",");
-
-function authorizeUrl(): string | null {
-  const { appId, redirectUri } = config.instagram;
-  if (!appId) return null;
-  const params = new URLSearchParams({
-    client_id: appId,
-    redirect_uri: redirectUri,
-    response_type: "code",
-    scope: SCOPES,
-  });
-  return `https://www.instagram.com/oauth/authorize?${params.toString()}`;
-}
-
+/**
+ * OAuth callback. Exchanges the code for a long-lived token, encrypts it,
+ * and stores it in the owner-scoped `accounts` vault. The plaintext token
+ * never touches the browser or the repo.
+ */
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const code = url.searchParams.get("code");
-  const error = url.searchParams.get("error_description") ?? url.searchParams.get("error");
+  const error =
+    url.searchParams.get("error_description") ?? url.searchParams.get("error");
 
-  if (error) return NextResponse.json({ error }, { status: 400 });
-
-  if (!code) {
-    const target = authorizeUrl();
-    if (!target) {
-      return NextResponse.json(
-        { error: "IG_APP_ID not set. Create the Meta app and set IG_APP_ID first." },
-        { status: 500 },
-      );
-    }
-    return NextResponse.json({ authorizeUrl: target, scopes: SCOPES });
+  if (error) {
+    return NextResponse.redirect(
+      new URL(`/connections?error=${encodeURIComponent(error)}`, url.origin),
+    );
   }
 
-  const short = await exchangeCode({ code });
-  const token = await toLongLived({
-    shortToken: short.accessToken,
-    userId: short.userId,
-  });
+  const supabase = await supabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return NextResponse.redirect(new URL("/login", url.origin));
 
-  const tokenPath = path.resolve("out/.ig-token.json");
-  await mkdir(path.dirname(tokenPath), { recursive: true });
-  await writeFile(tokenPath, JSON.stringify(token), "utf8");
+  if (!code) {
+    return NextResponse.redirect(
+      new URL("/api/oauth/instagram/start", url.origin),
+    );
+  }
 
-  return NextResponse.json({
-    ok: true,
-    userId: token.userId,
-    expiresAt: new Date(token.expiresAt).toISOString(),
-    hint: "Token stored at out/.ig-token.json. Export SHORTWAVE_IG_USER_ID and SHORTWAVE_IG_TOKEN to publish.",
-  });
+  try {
+    const shortTok = await exchangeCode({ code });
+    const token = await toLongLived({
+      shortToken: shortTok.accessToken,
+      userId: shortTok.userId,
+    });
+    const sealed = seal(token.accessToken);
+    const admin = supabaseAdmin();
+    const { error: dbErr } = await admin.from("accounts").upsert(
+      {
+        owner_id: user.id,
+        platform: "instagram",
+        external_id: token.userId,
+        token_ct: sealed.ct,
+        token_iv: sealed.iv,
+        token_tag: sealed.tag,
+        token_expires_at: new Date(token.expiresAt).toISOString(),
+        is_test: true,
+        status: "active",
+      },
+      { onConflict: "owner_id,platform,external_id" },
+    );
+    if (dbErr) throw dbErr;
+    return NextResponse.redirect(
+      new URL("/connections?connected=instagram", url.origin),
+    );
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "unknown error";
+    return NextResponse.redirect(
+      new URL(`/connections?error=${encodeURIComponent(msg)}`, url.origin),
+    );
+  }
 }

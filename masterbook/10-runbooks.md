@@ -41,8 +41,10 @@ npm run worker -- --publish
 
 ## Rotate the Instagram token
 1. `needsRefresh(expiresAt)` is true within 7 days of expiry.
-2. Re-run the OAuth flow (`/api/oauth/instagram`) **or** call
-   `refreshLongLived(token)`; the new token is written to `out/.ig-token.json`.
+2. The daily cron refreshes it automatically (`ensureFreshInstagramToken`), which
+   re-seals and updates the `accounts` row. To rotate manually, re-run the
+   **Connect Instagram** flow from `/connections`.
+3. `/connections` shows the current token expiry per account.
 
 ## Troubleshoot
 | Symptom | Likely cause | Fix |

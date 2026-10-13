@@ -41,20 +41,23 @@ IG_API_VERSION=v23.0
 ```
 
 ## 5. Run the OAuth flow
-1. `npm run dev` (control plane on :3040).
-2. Open <http://localhost:3040/api/oauth/instagram> → returns `{ "authorizeUrl": … }`.
-3. Open that URL, approve the scopes.
-4. You are redirected to `/api/oauth/instagram?code=…`, which exchanges the code,
-   upgrades it to a **long-lived (~60-day) token**, and writes `out/.ig-token.json`.
+1. `supabase start` then `npm run dev` (portal on :3040).
+2. Sign in at <http://localhost:3040/login> with a magic link (read it in Mailpit
+   at <http://127.0.0.1:54324>), then open **/connections**.
+3. Click **Connect Instagram** → you approve the scopes in your own browser.
+4. You land back on `/connections`; the long-lived token is **encrypted
+   (AES-256-GCM) and stored in the `accounts` vault** — never in a file, never in
+   the browser. See `13-auth-and-vault.md`.
 
 ## 6. Publish a reel
 ```
-export SHORTWAVE_IG_USER_ID=<from out/.ig-token.json userId>
-export SHORTWAVE_IG_TOKEN=<accessToken>
 npm run worker -- --publish
 ```
-The worker uploads the rendered MP4 to the public Supabase bucket, then calls
+The worker resolves the token from the vault (`lib/publish/token-source.ts`),
+uploads the rendered MP4 to the public Supabase bucket, then calls
 `createContainer` → poll `status_code` → `media_publish` with `is_ai_generated=true`.
+(For ad-hoc CLI runs you can still override with `SHORTWAVE_IG_USER_ID` /
+`SHORTWAVE_IG_TOKEN`.)
 
 ## 7. Keep the token alive
 Long-lived tokens expire after ~60 days. `needsRefresh()` flags a token within **7

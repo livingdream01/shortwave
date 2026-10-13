@@ -13,6 +13,7 @@ const nav = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/mission-control", label: "Mission Control" },
   { href: "/experiments", label: "Experiments" },
+  { href: "/connections", label: "Connections" },
 ];
 
 export default function RootLayout({

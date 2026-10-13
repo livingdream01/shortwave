@@ -18,6 +18,21 @@ captions layered on.
 - **Experiment engine:** Thompson-sampling bandit over `format × hook × length ×
   voice × caption` (675 arms).
 - **Monetization:** affiliate link registry with UTM tracking + FTC disclosure.
+- **Login portal:** email magic-link sign-in (Supabase Auth) + a `/connections`
+  page where Instagram is linked; OAuth tokens are **AES-256-GCM encrypted at
+  rest** and never reach the browser.
+
+## Login portal & connections (local)
+```bash
+brew install supabase/tap/supabase
+supabase start            # Postgres + Auth + Storage + Mailpit
+supabase db reset         # applies supabase/migrations/*
+npm run dev               # portal at http://localhost:3040 (redirects to /login)
+```
+Sign in with a magic link — read it from **Mailpit at http://127.0.0.1:54324**.
+Only `OPERATOR_EMAIL` may sign in. Then open **/connections → Connect Instagram**.
+Secrets live in `.env.local` (gitignored): `SW_TOKEN_KEK`, `IG_APP_ID`,
+`IG_APP_SECRET`. See `masterbook/13-auth-and-vault.md`.
 
 ## Quickstart
 ```bash

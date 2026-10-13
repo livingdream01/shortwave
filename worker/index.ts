@@ -13,6 +13,7 @@ import {
 import { createPublisher } from "../lib/publish/registry";
 import { uploadPublic } from "../lib/storage/supabase";
 import { injectCaption } from "../lib/monetize/links";
+import { ensureFreshInstagramToken } from "../lib/publish/token-source";
 import { appendRun } from "../lib/store";
 import type { Format, Series } from "../lib/types";
 
@@ -80,11 +81,10 @@ async function main() {
 
   if (has("publish")) {
     if (!renderPath) throw new Error("nothing to publish (no render)");
-    const igUserId = process.env.SHORTWAVE_IG_USER_ID;
-    const accessToken = process.env.SHORTWAVE_IG_TOKEN;
-    if (!igUserId || !accessToken) {
+    const token = await ensureFreshInstagramToken();
+    if (!token) {
       console.log(
-        "\n[publish] Set SHORTWAVE_IG_USER_ID and SHORTWAVE_IG_TOKEN (run the OAuth flow first). Skipping.",
+        "\n[publish] No Instagram account connected. Open http://localhost:3040/connections and connect one (or set SHORTWAVE_IG_USER_ID/SHORTWAVE_IG_TOKEN). Skipping.",
       );
       return;
     }
@@ -92,7 +92,7 @@ async function main() {
     const caption = injectCaption(episode.caption, []);
     const publisher = createPublisher({
       platform: "instagram",
-      config: { igUserId, accessToken },
+      config: { igUserId: token.igUserId, accessToken: token.accessToken },
     });
     const out = await publisher.publish({
       videoUrl,
@@ -101,7 +101,7 @@ async function main() {
     });
     console.log(`\n[publish] posted → ${out.externalId} (${out.status})`);
   } else {
-    console.log(`\nNext: set IG creds and run with --publish to post.`);
+    console.log(`\nNext: connect Instagram at /connections and run with --publish to post.`);
   }
 }
 

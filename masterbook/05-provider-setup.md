@@ -26,7 +26,8 @@ interface, so you can swap or stack providers without touching the pipeline.
 - Create a project → `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`.
 - Create a **public** bucket named `shortwave` (`SUPABASE_BUCKET`).
 - Instagram fetches the reel by URL, so the object must be publicly reachable.
-- Apply the schema: `psql "$DATABASE_URL" < supabase/schema.sql`.
+- Apply the schema: `supabase start && supabase db reset` (applies
+  `supabase/migrations/*.sql`). The `shortwave` bucket is used for public reels.
 
 ## Brain — DeepSeek
 - `DEEPSEEK_API_KEY`. OpenAI-compatible; `deepseek-chat` (fast) + `deepseek-reasoner`
