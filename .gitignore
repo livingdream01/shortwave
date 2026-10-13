@@ -1,0 +1,25 @@
+# deps
+node_modules/
+.pnp
+.pnp.js
+
+# next
+.next/
+out/
+next-env.d.ts
+
+# builds
+dist/
+*.tsbuildinfo
+
+# env & secrets
+.env
+.env.local
+.env*.local
+
+# os
+.DS_Store
+
+# render output
+out/renders/
+artifacts/
