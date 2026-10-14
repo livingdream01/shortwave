@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!-- Token refresh job (Mon + Thu). Keeps the 60-day token alive so you never
-     have to re-consent from neglect.
-     Install:  cp scripts/launchd/io.shortwave.refresh.plist ~/Library/LaunchAgents/
-               launchctl load ~/Library/LaunchAgents/io.shortwave.refresh.plist -->
+     have to re-consent from neglect. Wrapped in `caffeinate -s`.
+     Installed by scripts/install-launchd.sh (which substitutes the repo path). -->
 <plist version="1.0">
 <dict>
   <key>Label</key><string>io.shortwave.refresh</string>
   <key>ProgramArguments</key>
   <array>
+    <string>/usr/bin/caffeinate</string>
+    <string>-s</string>
     <string>/opt/homebrew/bin/npm</string>
     <string>run</string>
     <string>refresh</string>
   </array>
-  <key>WorkingDirectory</key><string>/Users/mac/shortwave</string>
+  <key>WorkingDirectory</key><string>__REPO__</string>
   <key>EnvironmentVariables</key>
   <dict>
     <key>PATH</key><string>/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
@@ -23,7 +24,7 @@
     <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>10</integer><key>Minute</key><integer>0</integer></dict>
     <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>10</integer><key>Minute</key><integer>0</integer></dict>
   </array>
-  <key>StandardOutPath</key><string>/Users/mac/shortwave/out/cron.refresh.log</string>
-  <key>StandardErrorPath</key><string>/Users/mac/shortwave/out/cron.refresh.err</string>
+  <key>StandardOutPath</key><string>__REPO__/out/cron.refresh.log</string>
+  <key>StandardErrorPath</key><string>__REPO__/out/cron.refresh.err</string>
 </dict>
 </plist>

@@ -3,30 +3,37 @@
 The goal: **one consent, then nothing.** After you connect Instagram once, the
 machine keeps the token alive and posts on schedule without you.
 
-## The two jobs
+## The jobs
 | Job | Command | Cadence | Does |
 |---|---|---|---|
 | **Sweep** | `npm run sweep` | 3×/day (09:00, 15:00, 21:00) | refresh token → publish one episode → alert on failure |
 | **Refresh** | `npm run refresh` | Mon + Thu 10:00 | extend the 60-day token so it never lapses from neglect |
+| **Keep-awake** | `caffeinate -s` | always on (optional) | stops the Mac sleeping so the jobs always fire |
 
-Install (edit the path if your repo isn't at `/Users/mac/shortwave`):
+Each job is wrapped in `caffeinate -s`, so a run is never interrupted by sleep.
+
+## Install / remove
 ```bash
-mkdir -p ~/Library/LaunchAgents
-cp scripts/launchd/io.shortwave.sweep.plist   ~/Library/LaunchAgents/
-cp scripts/launchd/io.shortwave.refresh.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/io.shortwave.sweep.plist
-launchctl load ~/Library/LaunchAgents/io.shortwave.refresh.plist
+bash scripts/install-launchd.sh              # sweep + refresh
+bash scripts/install-launchd.sh --keepawake  # also keep the Mac awake
+bash scripts/uninstall-launchd.sh            # remove all
 ```
-Check / unload:
+The installer substitutes your repo path automatically, so it works anywhere.
+Check status and logs:
 ```bash
 launchctl list | grep shortwave
-launchctl unload ~/Library/LaunchAgents/io.shortwave.sweep.plist
+pmset -g assertions | grep caffeinate        # confirm keep-awake is asserting
+tail -f out/cron.sweep.log out/alerts.log
 ```
-Logs land in `out/cron.sweep.log`, `out/cron.sweep.err`, `out/cron.refresh.*`.
 
-> **The Mac must be awake.** Colima + Docker + Supabase must be running too.
-> Add `caffeinate -s` as a login item, or point the worker at an always-on box
-> later. If the machine sleeps through every run, nothing posts.
+> **Keep-awake note:** loaded keep-awake means the Mac stays awake (and drains
+> faster **on battery** — keep it plugged in for overnight runs). Disable any time:
+> `bash scripts/uninstall-launchd.sh` (removes all), or unload just it:
+> `launchctl unload ~/Library/LaunchAgents/io.shortwave.keepawake.plist`.
+>
+> Colima + Docker + Supabase must be running at run time. Keep-awake stops the
+> Mac sleeping, but not your other services — if you reboot, `supabase start`
+> first (or add it to a login item).
 
 ## Alerting
 `lib/notify.ts` always appends to `out/alerts.log`; if `RESEND_API_KEY` and

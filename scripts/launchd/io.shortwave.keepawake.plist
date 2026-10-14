@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Keep-awake helper: prevents system sleep so scheduled jobs always fire.
+     Loaded = the Mac stays awake (on AC). Unload to let it sleep again:
+       launchctl unload ~/Library/LaunchAgents/io.shortwave.keepawake.plist
+     Installed by scripts/install-launchd.sh (which substitutes the repo path). -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>io.shortwave.keepawake</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/caffeinate</string>
+    <string>-s</string>
+  </array>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>__REPO__/out/cron.keepawake.log</string>
+  <key>StandardErrorPath</key><string>__REPO__/out/cron.keepawake.err</string>
+</dict>
+</plist>

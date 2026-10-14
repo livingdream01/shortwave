@@ -21,6 +21,9 @@ captions layered on.
 - **Login portal:** email magic-link sign-in (Supabase Auth) + a `/connections`
   page where Instagram is linked; OAuth tokens are **AES-256-GCM encrypted at
   rest** and never reach the browser.
+- **Unattended ops:** `npm run sweep` (refresh → publish → alert) on a launchd
+  schedule, a token-refresh job, a **keep-awake** helper, email alerting, and
+  `GET /api/health`. See `masterbook/14-unattended-ops.md`.
 
 ## Login portal & connections (local)
 ```bash
