@@ -6,11 +6,15 @@ machine keeps the token alive and posts on schedule without you.
 ## The jobs
 | Job | Command | Cadence | Does |
 |---|---|---|---|
+| **Boot** | `scripts/boot-stack.sh` | at login/boot | start Colima (Docker) + the local Supabase stack, idempotently |
 | **Sweep** | `npm run sweep` | 3×/day (09:00, 15:00, 21:00) | refresh token → publish one episode → alert on failure |
 | **Refresh** | `npm run refresh` | Mon + Thu 10:00 | extend the 60-day token so it never lapses from neglect |
 | **Keep-awake** | `caffeinate -s` | always on (optional) | stops the Mac sleeping so the jobs always fire |
 
 Each job is wrapped in `caffeinate -s`, so a run is never interrupted by sleep.
+The **boot** job is what makes it survive a reboot: after login it brings the
+Docker runtime and Supabase back up (~1–2 min), so the sweep doesn't fail with
+"Supabase unreachable". Its progress is logged to `out/boot.log`.
 
 ## Install / remove
 ```bash

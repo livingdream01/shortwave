@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Boot/login item: start Colima (Docker) + the local Supabase stack so the
+     scheduled sweep never silently stops after a reboot. Idempotent.
+     Installed by scripts/install-launchd.sh (which substitutes the repo path). -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>io.shortwave.boot</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>__REPO__/scripts/boot-stack.sh</string>
+  </array>
+  <key>RunAtLoad</key><true/>
+  <key>StandardOutPath</key><string>__REPO__/out/cron.boot.log</string>
+  <key>StandardErrorPath</key><string>__REPO__/out/cron.boot.err</string>
+</dict>
+</plist>

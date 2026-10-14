@@ -6,7 +6,7 @@ set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 AGENTS="$HOME/Library/LaunchAgents"
-JOBS=(sweep refresh)
+JOBS=(boot sweep refresh)
 for a in "$@"; do [ "$a" = "--keepawake" ] && JOBS+=(keepawake); done
 
 mkdir -p "$AGENTS" "$REPO/out"
@@ -24,5 +24,8 @@ echo
 echo "Installed jobs:"
 launchctl list | grep shortwave || true
 echo
-echo "Logs: $REPO/out/cron.*.log"
-[ "${JOBS[*]}" = "sweep refresh" ] && echo "Tip: re-run with --keepawake so the Mac never sleeps through a run."
+echo "Logs: $REPO/out/cron.*.log and $REPO/out/boot.log"
+case " ${JOBS[*]} " in
+  *" keepawake "*) ;;
+  *) echo "Tip: re-run with --keepawake so the Mac never sleeps through a run." ;;
+esac
