@@ -6,6 +6,9 @@ export interface PublishAsset {
   caption: string;
   /** Meta requires AI content to be self-disclosed. Default true. */
   isAiGenerated?: boolean;
+  /** Publish as a trial reel (shared to non-followers only) — safe experiments. */
+  trial?: boolean;
+  graduationStrategy?: "MANUAL" | "SS_PERFORMANCE";
 }
 
 export interface Publisher {

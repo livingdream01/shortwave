@@ -28,6 +28,10 @@ export const config = {
   },
   vault: { key: env("SW_TOKEN_KEK") },
   operatorEmail: env("OPERATOR_EMAIL"),
+  resend: {
+    apiKey: env("RESEND_API_KEY"),
+    from: env("NOTIFY_FROM") ?? "Shortwave <onboarding@resend.dev>",
+  },
   fal: { key: env("FAL_KEY") },
   replicate: { token: env("REPLICATE_API_TOKEN") },
   elevenlabs: {

@@ -58,6 +58,17 @@ describe("InstagramPublisher.createContainer", () => {
     expect(body.video_url).toBe(asset.videoUrl);
     expect(body.is_ai_generated).toBe(true);
   });
+
+  it("adds trial_params for a trial reel (safe experiments)", async () => {
+    const log: LogEntry[] = [];
+    await publisher(["FINISHED"], log).createContainer({
+      ...asset,
+      trial: true,
+    });
+    expect(log[0]!.body!.trial_params).toEqual({
+      graduation_strategy: "MANUAL",
+    });
+  });
 });
 
 describe("InstagramPublisher.awaitReady", () => {

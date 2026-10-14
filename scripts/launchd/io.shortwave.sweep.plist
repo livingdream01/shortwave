@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Unattended daily sweep: refresh token, publish one episode, alert on failure.
+     Install:  cp scripts/launchd/io.shortwave.sweep.plist ~/Library/LaunchAgents/
+               launchctl load ~/Library/LaunchAgents/io.shortwave.sweep.plist
+     Edit the WorkingDirectory if your repo is not at /Users/mac/shortwave. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>io.shortwave.sweep</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/npm</string>
+    <string>run</string>
+    <string>sweep</string>
+  </array>
+  <key>WorkingDirectory</key><string>/Users/mac/shortwave</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer></dict>
+    <dict><key>Hour</key><integer>15</integer><key>Minute</key><integer>0</integer></dict>
+    <dict><key>Hour</key><integer>21</integer><key>Minute</key><integer>0</integer></dict>
+  </array>
+  <key>StandardOutPath</key><string>/Users/mac/shortwave/out/cron.sweep.log</string>
+  <key>StandardErrorPath</key><string>/Users/mac/shortwave/out/cron.sweep.err</string>
+</dict>
+</plist>

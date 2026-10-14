@@ -11,6 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "worker": "tsx worker/index.ts",
+    "sweep": "tsx worker/sweep.ts",
+    "refresh": "tsx worker/refresh.ts",
     "render": "tsx worker/render-cli.ts",
     "remotion": "remotion studio remotion/index.ts"
   },

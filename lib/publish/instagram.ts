@@ -48,16 +48,21 @@ export class InstagramPublisher implements Publisher {
 
   async createContainer(asset: PublishAsset): Promise<string> {
     const url = `${this.host}/${this.version}/${this.cfg.igUserId}/media`;
-    const data = await postJson<{ id: string }>(
-      url,
-      {
-        media_type: "REELS",
-        video_url: asset.videoUrl,
-        caption: asset.caption,
-        is_ai_generated: asset.isAiGenerated ?? true,
-      },
-      { headers: this.headers(), fetchImpl: this.fetchImpl },
-    );
+    const body: Record<string, unknown> = {
+      media_type: "REELS",
+      video_url: asset.videoUrl,
+      caption: asset.caption,
+      is_ai_generated: asset.isAiGenerated ?? true,
+    };
+    if (asset.trial) {
+      body.trial_params = {
+        graduation_strategy: asset.graduationStrategy ?? "MANUAL",
+      };
+    }
+    const data = await postJson<{ id: string }>(url, body, {
+      headers: this.headers(),
+      fetchImpl: this.fetchImpl,
+    });
     if (!data.id) throw new Error("Instagram did not return a container id");
     return data.id;
   }

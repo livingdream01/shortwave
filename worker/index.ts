@@ -1,6 +1,7 @@
 import path from "node:path";
 import { mkdir } from "node:fs/promises";
-import { config, isDemo } from "../lib/config";
+import { pathToFileURL } from "node:url";
+import { isDemo } from "../lib/config";
 import { deepseek } from "../lib/agent/models";
 import { mockLlm } from "../lib/agent/mock";
 import { produceReel } from "../lib/agent/run";
@@ -15,15 +16,17 @@ import { uploadPublic } from "../lib/storage/supabase";
 import { injectCaption } from "../lib/monetize/links";
 import { ensureFreshInstagramToken } from "../lib/publish/token-source";
 import { appendRun } from "../lib/store";
+import { notify } from "../lib/notify";
 import type { Format, Series } from "../lib/types";
 
-function arg(name: string): string | undefined {
-  const hit = process.argv.find((a) => a.startsWith(`--${name}=`));
-  return hit ? hit.split("=")[1] : undefined;
-}
-const has = (name: string) => process.argv.includes(`--${name}`);
+/** Run one full produce → (optionally) publish cycle. Reusable by CLI + schedule. */
+export async function runOnce(argv: string[]): Promise<void> {
+  const has = (name: string) => argv.includes(`--${name}`);
+  const arg = (name: string) => {
+    const hit = argv.find((a) => a.startsWith(`--${name}=`));
+    return hit ? hit.split("=")[1] : undefined;
+  };
 
-async function main() {
   const demo = has("demo") || isDemo();
   const format = (arg("format") ?? "pet_soap") as Format;
 
@@ -75,7 +78,9 @@ async function main() {
   console.log(`Score:   ${episode.score}   Status: ${episode.status}`);
   console.log(`Steps:   ${steps.map((s) => s.name).join(" → ")}`);
   if (shotErrors.length) {
-    console.log(`Clip fallbacks: ${shotErrors.map((e) => `${e.provider}#${e.shotIndex}`).join(", ")}`);
+    console.log(
+      `Clip fallbacks: ${shotErrors.map((e) => `${e.provider}#${e.shotIndex}`).join(", ")}`,
+    );
   }
   console.log(`Reel:    ${renderPath}`);
 
@@ -83,8 +88,12 @@ async function main() {
     if (!renderPath) throw new Error("nothing to publish (no render)");
     const token = await ensureFreshInstagramToken();
     if (!token) {
+      await notify({
+        level: "error",
+        title: "No Instagram account connected — cannot publish",
+      });
       console.log(
-        "\n[publish] No Instagram account connected. Open http://localhost:3040/connections and connect one (or set SHORTWAVE_IG_USER_ID/SHORTWAVE_IG_TOKEN). Skipping.",
+        "\n[publish] No Instagram account connected. Open http://localhost:3040/connections and connect one. Skipping.",
       );
       return;
     }
@@ -98,6 +107,7 @@ async function main() {
       videoUrl,
       caption,
       isAiGenerated: true,
+      trial: true, // experiment safely: trial reels go to non-followers first
     });
     console.log(`\n[publish] posted → ${out.externalId} (${out.status})`);
   } else {
@@ -105,7 +115,11 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+const invokedDirectly =
+  process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (invokedDirectly) {
+  runOnce(process.argv.slice(2)).catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
