@@ -8,13 +8,35 @@ learns which formats hold a global audience — then attaches affiliate monetiza
 Built Hong-Kong-based, targeting a global English audience, with Simplified-Chinese
 captions layered on.
 
+<p>
+  <img src="https://img.shields.io/badge/license-MIT-059669" alt="MIT"/>
+  <img src="https://img.shields.io/badge/tests-92%20passing-059669" alt="tests"/>
+  <img src="https://img.shields.io/badge/Next.js-16-black" alt="Next.js 16"/>
+  <img src="https://img.shields.io/badge/self--hosted-yes-059669" alt="self-hosted"/>
+</p>
+
+> Self-hosted, MIT-licensed, and runs in **demo mode with zero API keys** — clone it
+> and render a real MP4 in minutes.
+
+## Quickstart (2 minutes, no keys)
+```bash
+git clone https://github.com/livingdream01/shortwave && cd shortwave
+make setup        # install, start Supabase, create .env.local
+make demo         # → a real 1080×1920 MP4 in out/renders/, fully offline
+make dev          # portal at http://localhost:3040
+```
+Driving it from **Claude / any MCP client**: `make mcp` (tools: `shortwave_health`,
+`shortwave_generate`, `shortwave_list_formats`, `shortwave_connect`).
+
 ## What works right now
 - **Agent loop:** scout → write → character-bible → storyboard → director → critic
   (reject↔rewrite, capped) → assemble → render → publish → measure.
 - **Five formats:** pet soap, school gossip, mythology, micro-horror, heist.
+- **Video providers:** fal.ai · **Higgsfield** · Replicate · Remotion slideshow
+  fallback — pluggable, routed per shot.
 - **Real video:** Remotion renders a **1080×1920 H.264 MP4** with bilingual captions.
 - **Instagram publishing:** Content Publishing API (container → poll → publish) with
-  `is_ai_generated=true`; App-Review-free path for your own account.
+  `is_ai_generated=true`; App-Review-free path for your own account; trial reels.
 - **Experiment engine:** Thompson-sampling bandit over `format × hook × length ×
   voice × caption` (675 arms).
 - **Monetization:** affiliate link registry with UTM tracking + FTC disclosure.
@@ -24,6 +46,7 @@ captions layered on.
 - **Unattended ops:** `npm run sweep` (refresh → publish → alert) on a launchd
   schedule, a token-refresh job, a **keep-awake** helper, email alerting, and
   `GET /api/health`. See `masterbook/14-unattended-ops.md`.
+- **MCP server:** drive the whole studio from Claude (parity with hosted plugins).
 
 ## Login portal & connections (local)
 ```bash
@@ -91,16 +114,27 @@ serverless limits). Data = Supabase Postgres + public Storage.
 | `09-monetization-and-partners.md` | affiliate programs + creator-payout gates |
 | `10-runbooks.md` | cron, publish, token rotation, troubleshooting |
 | `11-decisions-log.md` | ADRs |
+| `12-agent-roles.md` | no-duplicated-work ownership map |
+| `13-auth-and-vault.md` | portal auth + encrypted token vault |
+| `14-unattended-ops.md` | scheduled sweep, refresh, keep-awake, alerting |
+| `15-masterplan.md` | **the full build → open-source masterplan** |
 
 ## Status
-Phase 1 complete and verified: `lint`, `typecheck`, `build` green; **56 tests**;
-end-to-end demo produced a real 1080×1920 MP4. Live Instagram posting needs your
-Meta app credentials (`06-ig-oauth-setup.md`).
+Phase 0 complete and verified: `lint`, `typecheck`, `build` green; **92 tests**;
+end-to-end demo produced a real 1080×1920 MP4; login portal + encrypted vault
+verified; unattended jobs installed. Live Instagram posting needs the operator's
+Meta app (one consent) — see `masterbook/06-ig-oauth-setup.md`.
+
+## Contributing
+Open source under MIT. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the
+provider / connector / format recipes, [`ROADMAP.md`](ROADMAP.md) for direction, and
+[`masterbook/15-masterplan.md`](masterbook/15-masterplan.md) for the full plan.
+CI runs `lint · typecheck · test · build` on every PR.
 
 ## Roadmap
-TikTok Content Posting API (needs `video.publish` audit) → YouTube Shorts (also
-unlocks YPP) → Douyin (needs a mainland entity) → creator-payout optimization →
-Shortwave's own affiliate program.
+MCP + one-command bootstrap + Docker (Phase 1) → TikTok & YouTube Shorts connectors
++ live bandit feedback (Phase 2) → studio UX (Phase 3) → ecosystem (Phase 4).
+Full detail in `masterbook/15-masterplan.md`.
 
 ## License
-Private. All rights reserved.
+[MIT](LICENSE) © 2026 Shortwave contributors.

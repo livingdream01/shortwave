@@ -34,6 +34,12 @@ export const config = {
   },
   fal: { key: env("FAL_KEY") },
   replicate: { token: env("REPLICATE_API_TOKEN") },
+  higgsfield: {
+    keyId: env("HIGGSFIELD_API_KEY_ID"),
+    keySecret: env("HIGGSFIELD_API_KEY_SECRET"),
+    baseUrl: env("HIGGSFIELD_BASE_URL") ?? "https://api.higgsfield.ai",
+    model: env("HIGGSFIELD_MODEL"),
+  },
   elevenlabs: {
     apiKey: env("ELEVENLABS_API_KEY"),
     voiceId: env("ELEVENLABS_VOICE_ID"),

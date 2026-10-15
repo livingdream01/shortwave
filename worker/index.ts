@@ -11,6 +11,7 @@ import {
   replicateProvider,
   slideshowProvider,
 } from "../lib/video/providers";
+import { higgsfieldProvider } from "../lib/video/higgsfield";
 import { createPublisher } from "../lib/publish/registry";
 import { uploadPublic } from "../lib/storage/supabase";
 import { injectCaption } from "../lib/monetize/links";
@@ -55,7 +56,12 @@ export async function runOnce(argv: string[]): Promise<void> {
       llm: demo ? mockLlm() : deepseek(),
       providers: demo
         ? [slideshowProvider()]
-        : [falProvider(), replicateProvider(), slideshowProvider()],
+        : [
+            falProvider(),
+            higgsfieldProvider(),
+            replicateProvider(),
+            slideshowProvider(),
+          ],
       render: renderEpisode,
       outDir,
     },

@@ -13,10 +13,12 @@
     "worker": "tsx worker/index.ts",
     "sweep": "tsx worker/sweep.ts",
     "refresh": "tsx worker/refresh.ts",
+    "mcp": "tsx mcp/server.ts",
     "render": "tsx worker/render-cli.ts",
     "remotion": "remotion studio remotion/index.ts"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "@remotion/bundler": "^4.0.519",
     "@remotion/cli": "^4.0.519",
     "@remotion/renderer": "^4.0.519",
@@ -25,7 +27,8 @@
     "next": "^16.4.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "remotion": "^4.0.519"
+    "remotion": "^4.0.519",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.0",
